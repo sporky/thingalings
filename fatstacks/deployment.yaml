@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fat-stacks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fat-stacks
+  template:
+    metadata:
+      labels:
+        app: fat-stacks
+    spec:
+      containers:
+      - image: "f5devcentral/f5-demo-httpd:openshift"
+        env:
+        - name: F5DEMO_APP
+          value: "website"
+        - name: F5DEMO_NODENAME
+          value: "CIS ConfigMap"
+        imagePullPolicy: IfNotPresent
+        name: fat-stacks
+        ports:
+        - containerPort: 8080
+          protocol: TCP

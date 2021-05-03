@@ -1,0 +1,21 @@
+apiVersion: "cis.f5.com/v1"
+kind: TransportServer
+metadata:
+  name: heftyboi-transport
+  namespace: cis-crd
+  labels:
+    app: heftyboi
+    f5cr: "true"
+spec:
+   virtualServerName: OhSparky
+   virtualServerAddress: 10.1.10.80
+   virtualServerPort: 899
+   mode: standard
+   snat: auto
+   pool:
+     service: heftyboi
+     servicePort: 1985
+     monitor:
+       type: tcp
+       interval: 10
+       timeout: 31

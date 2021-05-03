@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heftyboi
+  namespace: cis-crd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: heftyboi
+  template:
+    metadata:
+      namespace: cis-crd
+      labels:
+        app: heftyboi
+    spec:
+      containers:
+      - image: "f5devcentral/f5-demo-httpd:openshift"
+        env:
+        - name: F5DEMO_APP
+          value: "website"
+        - name: F5DEMO_NODENAME
+          value: "CIS ConfigMap"
+        imagePullPolicy: IfNotPresent
+        name: heftyboi
+        namespace: cis-crd
+        ports:
+        - containerPort: 1985
+          protocol: TCP
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: cis-crd
+  name: heftyboi
+  labels:
+    app: heftyboi
+
+spec:
+  ports:
+  - name: heftyboi
+    port: 1985
+    protocol: TCP
+    targetPort: 1979
+  type: NodePort
+  selector:
+    app: heftyboi
+
+apiVersion: "cis.f5.com/v1"
+kind: TransportServer
+metadata:
+  name: heftyboi-transport
+  namespace: cis-crd
+  labels:
+    app: heftyboi
+    f5cr: "true"
+spec:
+   virtualServerName: OhSparky
+   virtualServerAddress: 10.1.10.80
+   virtualServerPort: 899
+   mode: standard
+   snat: auto
+   pool:
+     service: heftyboi
+     servicePort: 1985
+     monitor:
+       type: tcp
+       interval: 10
+       timeout: 31

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fat-stacks
+  labels:
+    app: fat-stacks
+    cis.f5.com/as3-tenant: BigMoney
+    cis.f5.com/as3-app: CaChing
+    cis.f5.com/as3-pool: fatstack_pool
+
+spec:
+  ports:
+  - name: fat-stacks
+    port: 8888
+    protocol: TCP
+    targetPort: 8080
+  type: NodePort
+  selector:
+    app: fat-stacks
+

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: cis-crd
+  name: heftyboi
+  labels:
+    app: heftyboi
+
+spec:
+  ports:
+  - name: heftyboi
+    port: 1985
+    protocol: TCP
+    targetPort: 1979
+  type: NodePort
+  selector:
+    app: heftyboi
+

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heftyboi
+  namespace: cis-crd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: heftyboi
+  template:
+    metadata:
+      namespace: cis-crd
+      labels:
+        app: heftyboi
+    spec:
+      containers:
+      - image: "f5devcentral/f5-demo-httpd:openshift"
+        env:
+        - name: F5DEMO_APP
+          value: "website"
+        - name: F5DEMO_NODENAME
+          value: "CIS ConfigMap"
+        imagePullPolicy: IfNotPresent
+        name: heftyboi
+        namespace: cis-crd
+        ports:
+        - containerPort: 1985
+          protocol: TCP

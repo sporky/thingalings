@@ -1,0 +1,59 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: crd-f5-bigip-ctlr
+  namespace: kube-system
+  labels:
+    app: crd-f5-bigip-ctlr
+    release: cis-crd
+spec:
+  selector:
+    matchLabels:
+      app: crd-f5-bigip-ctlr
+  template:
+    metadata:
+      labels:
+        app: crd-f5-bigip-ctlr
+        release: cis-crd
+    spec:
+      containers:
+        - resources: {}
+          args:
+          - --credentials-directory
+          - /tmp/creds
+          - --agent=as3
+          - --bigip-partition=crd
+          - --bigip-url=10.1.20.240
+          - --insecure=true
+          - --log-as3-response=true
+          - --log-level=INFO
+          - --manage-configmaps=false
+          - --manage-ingress=false
+          - --manage-routes=false
+          - --custom-resource-mode=true
+          - --namespace-label=use_crd=true
+          - --share-nodes=true
+          - --pool-member-type=nodeport
+          command:
+            - /app/bin/k8s-bigip-ctlr
+          image: f5networks/k8s-bigip-ctlr:2.2.0
+          imagePullPolicy: IfNotPresent
+          name: crd-f5-bigip-ctlr
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /tmp/creds
+              name: bigip-creds
+              readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: cis-crd-f5-bigip-ctlr
+      serviceAccountName: cis-crd-f5-bigip-ctlr
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: bigip-creds
+          secret:
+            defaultMode: 420
+            secretName: bigip-login

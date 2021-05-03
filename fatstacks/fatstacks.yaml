@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fat-stacks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fat-stacks
+  template:
+    metadata:
+      labels:
+        app: fat-stacks
+    spec:
+      containers:
+      - image: "f5devcentral/f5-demo-httpd:openshift"
+        env:
+        - name: F5DEMO_APP
+          value: "website"
+        - name: F5DEMO_NODENAME
+          value: "CIS ConfigMap"
+        imagePullPolicy: IfNotPresent
+        name: fat-stacks
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fat-stacks
+  labels:
+    app: fat-stacks
+    cis.f5.com/as3-tenant: BigMoney
+    cis.f5.com/as3-app: CaChing
+    cis.f5.com/as3-pool: fatstack_pool
+
+spec:
+  ports:
+  - name: fat-stacks
+    port: 8888
+    protocol: TCP
+    targetPort: 8080
+  type: NodePort
+  selector:
+    app: fat-stacks
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: fatstacks-as3-configmap
+  labels:
+    f5type: virtual-server
+    as3: "true"
+data:
+  template: |
+    {
+      "class": "AS3",
+      "declaration": {
+        "class": "ADC",
+        "schemaVersion": "3.1.0",
+        "id": "f5demo",
+        "label": "Big Money App",
+        "remark": "Example of using CIS ConfigMap",
+        "BigMoney": {
+          "class": "Tenant",
+          "CaChing": {
+             "class": "Application",
+             "template": "generic",
+             "users-amirite": {
+                "class": "Service_TCP",
+                "virtualAddresses": ["10.1.10.101"],
+               "remark":"frontend: fatstacks.tcp.v1",
+               "persistenceMethods":[],
+               "virtualPort": 8888,
+                "pool": "fatstack_pool",
+                "shareAddresses": true
+             },
+             "fatstack_pool": {
+                "class": "Pool",
+                "monitors": [ "tcp" ],
+                "members": [{
+                   "servicePort": 8080,
+                   "serverAddresses": [],
+                   "shareNodes": true
+                }]
+             }
+       }
+       }
+    }
+    }
+
